@@ -10,6 +10,7 @@ import Foundation
 
 import IOKit
 import IOKit.usb
+import IOKit.usb.IOUSBLib
 
 print("Scanning USB Bus.....\n\n\n")
 
