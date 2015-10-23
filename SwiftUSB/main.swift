@@ -33,11 +33,10 @@ let kIOUSBDeviceInterfaceID:        CFUUID = CFUUIDGetConstantUUIDWithBytes(kCFA
 
 var usbIterator:    io_iterator_t   = io_iterator_t()
 var usbDevice:      io_service_t    = io_service_t()
-
 var usbVendorID:    UInt16          = 0
+var score:          Int32           = 0
 
 var plugInInterfacePtrPtr           = UnsafeMutablePointer<UnsafeMutablePointer<IOCFPlugInInterface>>()
-var score:          Int32           = 0
 
 // From: CFPlugInCOM.h: public typealias LPVOID =  UnsafeMutablePointer<Void>()
 var deviceInterfaceVoidPtr = UnsafeMutablePointer<Void>()
@@ -47,7 +46,6 @@ let matchingDictionary: NSMutableDictionary =  IOServiceMatching(kIOUSBDeviceCla
 
 // get iterator for matching USB devices
 let matchingServicesResult = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDictionary, &usbIterator)
-
 if (matchingServicesResult != kIOReturnSuccess) {
     print("Error getting deviceList!")
     exit(EXIT_FAILURE)
@@ -91,6 +89,8 @@ while(usbDevice != 0) {
     let plugInInterface: IOCFPlugInInterface = plugInInterfacePtrPtr.memory.memory
 	
     // use plug in interface to get a device interface
+    // public var QueryInterface: (@convention(c) (UnsafeMutablePointer<Void>, REFIID, UnsafeMutablePointer<LPVOID>) -> HRESULT)!
+
     let deviceInterfaceResult = plugInInterface.QueryInterface(
                                         plugInInterfacePtrPtr,
                                         CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID),
@@ -101,10 +101,11 @@ while(usbDevice != 0) {
         exit(EXIT_FAILURE)
     }
 	
-    // derefence pointer for device interface
+    // dereference the IOUSBDeviceInterface struct from pointer var after
+    // converting from a void to a IOUSBDeviceInterface pointer
     let deviceInterface = (UnsafeMutablePointer<IOUSBDeviceInterface>(deviceInterfaceVoidPtr)).memory
 	
-    // get USB Vendor ID
+    // get USB Vendor ID --> CRASH
     let vendorResult = deviceInterface.GetDeviceVendor(deviceInterfaceVoidPtr, &usbVendorID)
 	
     if(vendorResult != kIOReturnSuccess) {
